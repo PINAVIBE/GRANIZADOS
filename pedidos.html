@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos en vivo · Granizados El Frescor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pedidos.css">
+</head>
+<body class="ops-body">
+
+  <header class="ops-header">
+    <h1>🍧 Pedidos en vivo</h1>
+    <p class="ops-sub">Se actualiza solo. No hace falta recargar la página.</p>
+  </header>
+
+  <main class="board">
+    <section class="column">
+      <h2 class="column-title pendiente">
+        Pendientes <span class="count" id="countPendientes">0</span>
+      </h2>
+      <div class="cards" id="cardsPendientes">
+        <p class="empty-msg" id="emptyPendientes">No hay pedidos pendientes 🎉</p>
+      </div>
+    </section>
+
+    <section class="column">
+      <h2 class="column-title listo">
+        Listos para entregar <span class="count" id="countListos">0</span>
+      </h2>
+      <div class="cards" id="cardsListos">
+        <p class="empty-msg" id="emptyListos">Todavía no hay nada listo</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="pedidos.js"></script>
+</body>
+</html>

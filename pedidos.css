@@ -1,0 +1,169 @@
+/* =========================================================
+   pedidos.css — pantalla del puesto
+   Reusa las variables de color/tipografía definidas en styles.css
+   (--bg, --ink, --cereza, etc.) para que se vea como parte de la
+   misma app, pero con un layout pensado para una pantalla grande
+   fija en el mostrador, no para un celular.
+   ========================================================= */
+
+.ops-body {
+  padding-bottom: 0;
+}
+
+.ops-header {
+  padding: 20px 28px 10px;
+  text-align: left;
+}
+
+.ops-header h1 {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ops-sub {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  padding: 10px 28px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .board { grid-template-columns: 1fr; }
+}
+
+.column-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.column-title.pendiente { color: var(--mango); }
+.column-title.listo { color: var(--limon); }
+
+.count {
+  background: rgba(255,255,255,0.08);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 12px;
+}
+
+.cards {
+  display: grid;
+  gap: 12px;
+}
+
+.empty-msg {
+  color: var(--ink-soft);
+  font-size: 14px;
+  padding: 18px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+}
+
+.order-card {
+  background: var(--bg-elev);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  animation: card-in 0.25s ease;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.order-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.order-card-head .order-num {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.order-card-head .order-time {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.order-items {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.order-items li {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+.order-items .item-qty {
+  color: var(--ink-soft);
+  margin-right: 6px;
+}
+
+.order-total {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+
+.order-total strong {
+  color: var(--ink);
+}
+
+.order-action {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.order-action:hover { opacity: 0.85; }
+
+.order-action.to-listo {
+  background: var(--mango);
+  color: #0A0D14;
+}
+
+.order-action.to-entregado {
+  background: var(--limon);
+  color: #0A0D14;
+}
+
+/* Pedido recién llegado: lo resaltamos un instante para que se note */
+.order-card.is-new {
+  box-shadow: 0 0 0 2px var(--mango);
+}
