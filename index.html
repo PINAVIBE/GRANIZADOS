@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Granizados El Frescor · Menú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ====== HERO ====== -->
+  <header class="hero">
+    <p class="eyebrow">Escanea · Elige · Disfruta</p>
+    <h1>🍧 Granizados <span class="brand">El Frescor</span></h1>
+    <p class="hero-sub">Pedí desde tu celular. Te avisamos cuando esté listo.</p>
+
+    <!-- Los puntos de sabor filtran el menú Y muestran el color real de cada sabor -->
+    <div class="flavor-filters" id="flavorFilters" role="group" aria-label="Filtrar por sabor">
+      <button class="dot active" data-flavor="all">Todos</button>
+      <button class="dot" data-flavor="cereza" style="--c: var(--cereza)">Cereza</button>
+      <button class="dot" data-flavor="mango" style="--c: var(--mango)">Mango</button>
+      <button class="dot" data-flavor="limon" style="--c: var(--limon)">Limón</button>
+      <button class="dot" data-flavor="mora" style="--c: var(--mora)">Mora</button>
+      <button class="dot" data-flavor="tamarindo" style="--c: var(--tamarindo)">Tamarindo</button>
+    </div>
+    <div class="wave" aria-hidden="true"></div>
+  </header>
+
+  <!-- ====== MENÚ ====== -->
+  <main class="menu" id="menu" aria-label="Menú de granizados">
+    <!-- Las tarjetas se generan con JS desde script.js (mirá el array MENU) -->
+  </main>
+
+  <footer class="site-footer">
+    <p>Fase 1 del proyecto · Menú y carrito en memoria · Hecho para aprender 🍧</p>
+  </footer>
+
+  <!-- ====== BARRA DE CARRITO (fija abajo) ====== -->
+  <button class="cart-bar" id="cartToggle" aria-haspopup="true" aria-controls="cartDrawer">
+    <span class="cart-bar-icon">🛒</span>
+    <span id="cartCount">0</span> producto(s)
+    <span class="cart-bar-total">$<span id="cartTotal">0</span></span>
+  </button>
+
+  <!-- ====== PANEL DEL CARRITO ====== -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
+    <div class="cart-drawer-head">
+      <h2>Tu pedido</h2>
+      <button class="icon-btn" id="closeCart" aria-label="Cerrar carrito">✕</button>
+    </div>
+    <ul class="cart-list" id="cartItems">
+      <li class="cart-empty" id="cartEmptyMsg">Aún no agregaste nada. Tocá “+” en un sabor 👆</li>
+    </ul>
+    <div class="cart-drawer-foot">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <strong>$<span id="cartTotalFull">0</span></strong>
+      </div>
+      <button class="btn-primary" id="confirmOrder" disabled>Confirmar pedido</button>
+    </div>
+  </aside>
+
+  <!-- ====== CONFIRMACIÓN DE PEDIDO ====== -->
+  <div class="confirmation" id="orderConfirmation" hidden>
+    <div class="confirmation-card">
+      <p class="confirmation-emoji">🎉</p>
+      <h2>¡Pedido recibido!</h2>
+      <p class="order-number">Orden #<span id="orderNumber"></span></p>
+      <p class="confirmation-note">Mostrá esta pantalla en el puesto para recoger tu granizado.</p>
+      <button class="btn-primary" id="newOrder">Hacer otro pedido</button>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
