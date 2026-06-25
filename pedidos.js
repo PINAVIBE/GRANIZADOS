@@ -1,8 +1,10 @@
 
+
 import { db, iniciarSesion, cerrarSesion, alCambiarSesion } from "./firebase-init.js";
 import {
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
   doc,
@@ -11,10 +13,14 @@ import {
 
 const cardsPendientes = document.getElementById("cardsPendientes");
 const cardsListos = document.getElementById("cardsListos");
+const cardsEntregados = document.getElementById("cardsEntregados");
 const emptyPendientes = document.getElementById("emptyPendientes");
 const emptyListos = document.getElementById("emptyListos");
+const emptyEntregados = document.getElementById("emptyEntregados");
 const countPendientes = document.getElementById("countPendientes");
 const countListos = document.getElementById("countListos");
+const countEntregados = document.getElementById("countEntregados");
+const totalDinero = document.getElementById("totalDinero");
 
 const loginScreen = document.getElementById("loginScreen");
 const loginForm = document.getElementById("loginForm");
@@ -49,6 +55,7 @@ function haceCuanto(timestamp) {
 function crearTarjeta(pedido) {
   const card = document.createElement("article");
   card.className = "order-card";
+  if (pedido.estado === "entregado") card.classList.add("is-entregado");
   if (!idsConocidos.has(pedido.id)) {
     card.classList.add("is-new");
     setTimeout(() => card.classList.remove("is-new"), 4000);
@@ -58,9 +65,13 @@ function crearTarjeta(pedido) {
     .map((it) => `<li><span><span class="item-qty">${it.qty}×</span>${it.name}</span><span>$${formatPrice(it.subtotal)}</span></li>`)
     .join("");
 
-  const accion = pedido.estado === "pendiente"
-    ? `<button class="order-action to-listo" data-id="${pedido.id}" data-next="listo">✅ Marcar como listo</button>`
-    : `<button class="order-action to-entregado" data-id="${pedido.id}" data-next="entregado">📦 Marcar como entregado</button>`;
+  let accion = "";
+  if (pedido.estado === "pendiente") {
+    accion = `<button class="order-action to-listo" data-id="${pedido.id}" data-next="listo">✅ Marcar como listo</button>`;
+  } else if (pedido.estado === "listo") {
+    accion = `<button class="order-action to-entregado" data-id="${pedido.id}" data-next="entregado">📦 Marcar como entregado</button>`;
+  }
+  // Si ya está "entregado" no hay botón: es un estado final, solo queda como registro.
 
   card.innerHTML = `
     <div class="order-card-head">
@@ -77,9 +88,14 @@ function crearTarjeta(pedido) {
 function render() {
   const pendientes = ultimosPedidos.filter((p) => p.estado === "pendiente");
   const listos = ultimosPedidos.filter((p) => p.estado === "listo");
+  const entregados = ultimosPedidos.filter((p) => p.estado === "entregado");
 
   countPendientes.textContent = pendientes.length;
   countListos.textContent = listos.length;
+  countEntregados.textContent = entregados.length;
+
+  const recaudadoHoy = entregados.reduce((suma, p) => suma + p.total, 0);
+  totalDinero.textContent = `$${formatPrice(recaudadoHoy)}`;
 
   cardsPendientes.innerHTML = "";
   emptyPendientes.style.display = pendientes.length ? "none" : "block";
@@ -91,17 +107,30 @@ function render() {
   cardsListos.appendChild(emptyListos);
   listos.forEach((p) => cardsListos.appendChild(crearTarjeta(p)));
 
+  cardsEntregados.innerHTML = "";
+  emptyEntregados.style.display = entregados.length ? "none" : "block";
+  cardsEntregados.appendChild(emptyEntregados);
+  // Los más recién entregados arriba, para no tener que scrollear todo el día.
+  [...entregados].reverse().forEach((p) => cardsEntregados.appendChild(crearTarjeta(p)));
+
   idsConocidos = new Set(ultimosPedidos.map((p) => p.id));
 }
 
 // Empieza a escuchar la colección "pedidos" en tiempo real.
 // Solo se llama cuando sabemos que hay sesión iniciada.
 function empezarAEscuchar() {
-  const pedidosQuery = query(collection(db, "pedidos"), orderBy("creadoEn", "asc"));
+  // Medianoche de hoy, hora local del navegador.
+  const inicioDelDia = new Date();
+  inicioDelDia.setHours(0, 0, 0, 0);
+
+  const pedidosQuery = query(
+    collection(db, "pedidos"),
+    where("creadoEn", ">=", inicioDelDia),
+    orderBy("creadoEn", "asc")
+  );
+
   detenerEscucha = onSnapshot(pedidosQuery, (snapshot) => {
-    ultimosPedidos = snapshot.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((p) => p.estado !== "entregado"); // los entregados ya no se muestran acá
+    ultimosPedidos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     render();
   });
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PEDIDOS EN VIVO · HOOKAH</title>
+<title>Pedidos en vivo · HOOKAH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -25,7 +25,7 @@
     <div class="login-card-wrap">
       <form class="login-card" id="loginForm">
         <p class="login-icon"></p>
-        <p class="login-eyebrow"></p>
+        <p class="login-eyebrow">BIENVENIDO</p>
         <h2>Granizados <span class="brand">HOOKAH</span></h2>
         <p class="login-sub">Ingresá con tu correo y contraseña para ver los pedidos.</p>
         <input type="email" id="loginEmail" placeholder="Correo" required autocomplete="username">
@@ -52,6 +52,16 @@
       </h2>
       <div class="cards" id="cardsListos">
         <p class="empty-msg" id="emptyListos">Todavía no hay nada listo</p>
+      </div>
+    </section>
+
+    <section class="column">
+      <h2 class="column-title entregado">
+        Entregados hoy <span class="count" id="countEntregados">0</span>
+        <span class="money" id="totalDinero">$0</span>
+      </h2>
+      <div class="cards" id="cardsEntregados">
+        <p class="empty-msg" id="emptyEntregados">Todavía no entregaste nada hoy</p>
       </div>
     </section>
   </main>
