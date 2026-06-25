@@ -1,14 +1,3 @@
-/* =========================================================
-   firebase-init.js
-   Conexión con Firebase. Un solo lugar con la config y la
-   conexión a Firestore, para que script.js solo se preocupe
-   del carrito, no de cómo se guardan los datos.
-
-   Como usamos HTML plano (sin npm/Vite/Webpack), importamos
-   el SDK de Firebase directo desde su CDN oficial con módulos
-   de JavaScript (ESM) — funciona en cualquier navegador moderno.
-   ========================================================= */
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getFirestore,

@@ -1,8 +1,4 @@
-/* =========================================================
-   GRANIZADOS EL FRESCOR — lógica del menú y el carrito
-   Fase 3: el pedido ya se guarda de verdad en Firestore,
-   así no se pierde y el puesto puede verlo en otra pantalla.
-   ========================================================= */
+
 
 import { guardarPedido } from "./firebase-init.js";
 
