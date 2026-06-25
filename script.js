@@ -1,24 +1,74 @@
 
-
 import { guardarPedido } from "./firebase-init.js";
 
 // 1) LOS DATOS DEL MENÚ
-// En un sistema real esto vendría de una base de datos.
-// Por ahora es un simple arreglo de objetos: nuestra "fuente de la verdad".
+// Cada sabor ya no tiene un solo precio: tiene una lista de tamaños,
+// cada uno con su propio precio.
 const MENU = [
-  { id: "cereza",     name: "Cereza",          desc: "El clásico de toda la vida", price: 3000, flavor: "cereza" },
-  { id: "mango",      name: "Mango",           desc: "Dulce y tropical",            price: 3000, flavor: "mango" },
-  { id: "limon",      name: "Limón",           desc: "Refrescante, el más pedido",  price: 2500, flavor: "limon" },
-  { id: "mora",       name: "Mora azul",       desc: "Intenso y frutal",            price: 3000, flavor: "mora" },
-  { id: "tamarindo",  name: "Tamarindo",       desc: "Agridulce, para valientes",   price: 3500, flavor: "tamarindo" },
+  {
+    id: "cereza", name: "Cereza", desc: "El clásico de toda la vida", flavor: "cereza",
+    sizes: [
+      { id: "pequeno", label: "Pequeño", price: 2500 },
+      { id: "mediano", label: "Mediano", price: 3000 },
+      { id: "grande", label: "Grande", price: 3800 },
+    ],
+  },
+  {
+    id: "mango", name: "Mango", desc: "Dulce y tropical", flavor: "mango",
+    sizes: [
+      { id: "pequeno", label: "Pequeño", price: 2500 },
+      { id: "mediano", label: "Mediano", price: 3000 },
+      { id: "grande", label: "Grande", price: 3800 },
+    ],
+  },
+  {
+    id: "limon", name: "Limón", desc: "Refrescante, el más pedido", flavor: "limon",
+    sizes: [
+      { id: "pequeno", label: "Pequeño", price: 2000 },
+      { id: "mediano", label: "Mediano", price: 2500 },
+      { id: "grande", label: "Grande", price: 3300 },
+    ],
+  },
+  {
+    id: "mora", name: "Mora azul", desc: "Intenso y frutal", flavor: "mora",
+    sizes: [
+      { id: "pequeno", label: "Pequeño", price: 2500 },
+      { id: "mediano", label: "Mediano", price: 3000 },
+      { id: "grande", label: "Grande", price: 3800 },
+    ],
+  },
+  {
+    id: "tamarindo", name: "Tamarindo", desc: "Agridulce, para valientes", flavor: "tamarindo",
+    sizes: [
+      { id: "pequeno", label: "Pequeño", price: 3000 },
+      { id: "mediano", label: "Mediano", price: 3500 },
+      { id: "grande", label: "Grande", price: 4300 },
+    ],
+  },
+];
+
+// Los extras son los mismos sin importar el sabor.
+const EXTRAS = [
+  { id: "leche", name: "Leche condensada", price: 500 },
+  { id: "gomitas", name: "Gomitas", price: 700 },
+  { id: "tapioca", name: "Bolitas de tapioca", price: 900 },
+  { id: "chamoy", name: "Chamoy", price: 600 },
 ];
 
 // 2) EL ESTADO DEL CARRITO
-// Usamos un objeto { idDelProducto: cantidad }. Ej: { cereza: 2, mango: 1 }
-// Es la estructura más simple posible para "qué hay en el carrito".
+// Antes era { idSabor: cantidad }. Ahora cada "combo" (sabor + tamaño +
+// extras elegidos) es su propia línea, porque dos pedidos de Cereza con
+// tamaños distintos no pueden compartir cantidad ni precio.
+// cart = { comboKey: { flavorId, sizeId, extraIds: [...], qty } }
 let cart = {};
 
-// 3) REFERENCIAS A ELEMENTOS DEL DOM (los buscamos una sola vez)
+// Estado temporal mientras el cliente está eligiendo tamaño/extras
+// para un sabor (antes de tocar "Agregar").
+let sheetFlavorId = null;
+let selectedSizeId = null;
+let selectedExtraIds = new Set();
+
+// 3) REFERENCIAS A ELEMENTOS DEL DOM
 const menuEl = document.getElementById("menu");
 const filtersEl = document.getElementById("flavorFilters");
 const cartToggle = document.getElementById("cartToggle");
@@ -35,15 +85,25 @@ const confirmationEl = document.getElementById("orderConfirmation");
 const orderNumberEl = document.getElementById("orderNumber");
 const newOrderBtn = document.getElementById("newOrder");
 
-// Formatea números como pesos: 3000 -> "3.000"
+const sizeOverlay = document.getElementById("sizeOverlay");
+const sizeSheet = document.getElementById("sizeSheet");
+const sizeSheetTitle = document.getElementById("sizeSheetTitle");
+const sizeOptionsEl = document.getElementById("sizeOptions");
+const extraOptionsEl = document.getElementById("extraOptions");
+const closeSizeSheetBtn = document.getElementById("closeSizeSheet");
+const addToCartBtn = document.getElementById("addToCartBtn");
+
 function formatPrice(n) {
   return n.toLocaleString("es-CO");
 }
 
-// 4) PINTAR EL MENÚ EN PANTALLA
-// Recibe un filtro ("all" o un sabor) y dibuja solo lo que corresponde.
+function findFlavor(id) {
+  return MENU.find((m) => m.id === id);
+}
+
+// 4) PINTAR EL MENÚ
 function renderMenu(filter = "all") {
-  menuEl.innerHTML = ""; // limpiamos antes de volver a pintar
+  menuEl.innerHTML = "";
 
   MENU.forEach((item) => {
     const card = document.createElement("article");
@@ -53,37 +113,115 @@ function renderMenu(filter = "all") {
       card.classList.add("hidden");
     }
 
+    const desdePrecio = item.sizes[0].price;
+
     card.innerHTML = `
       <div class="stripe"></div>
       <div class="info">
         <span class="name">${item.name}</span>
         <span class="desc">${item.desc}</span>
-        <span class="price">$${formatPrice(item.price)}</span>
+        <span class="price">Desde $${formatPrice(desdePrecio)}</span>
       </div>
-      <button class="add-btn" data-id="${item.id}" aria-label="Agregar ${item.name}">+</button>
+      <button class="add-btn" data-id="${item.id}" aria-label="Elegir tamaño y extras de ${item.name}">+</button>
     `;
     menuEl.appendChild(card);
   });
 }
 
-// 5) AGREGAR / QUITAR DEL CARRITO
-function addToCart(id) {
-  cart[id] = (cart[id] || 0) + 1;
+// 5) HOJA DE TAMAÑO Y EXTRAS
+// Se abre al tocar "+" en un sabor. El cliente elige tamaño (uno solo)
+// y extras (varios), y recién ahí se agrega al carrito.
+function openSizeSheet(flavorId) {
+  const flavor = findFlavor(flavorId);
+  sheetFlavorId = flavorId;
+  selectedSizeId = flavor.sizes[1].id; // mediano por defecto
+  selectedExtraIds = new Set();
+
+  sizeSheet.style.setProperty("--chip-color", `var(--${flavor.flavor})`);
+  renderSizeSheet();
+
+  sizeSheet.classList.add("open");
+  sizeOverlay.classList.add("open");
+  sizeSheet.setAttribute("aria-hidden", "false");
+}
+
+function closeSizeSheet() {
+  sizeSheet.classList.remove("open");
+  sizeOverlay.classList.remove("open");
+  sizeSheet.setAttribute("aria-hidden", "true");
+}
+
+// Vuelve a dibujar la hoja completa según lo que esté seleccionado ahora.
+// Se llama cada vez que el cliente toca un tamaño o un extra distinto.
+function renderSizeSheet() {
+  const flavor = findFlavor(sheetFlavorId);
+  sizeSheetTitle.textContent = flavor.name;
+
+  sizeOptionsEl.innerHTML = flavor.sizes.map((size) => `
+    <button type="button" class="size-chip ${size.id === selectedSizeId ? "selected" : ""}" data-size="${size.id}">
+      ${size.label}
+      <span class="chip-price">$${formatPrice(size.price)}</span>
+    </button>
+  `).join("");
+
+  extraOptionsEl.innerHTML = EXTRAS.map((extra) => `
+    <label class="extra-row">
+      <input type="checkbox" data-extra="${extra.id}" ${selectedExtraIds.has(extra.id) ? "checked" : ""}>
+      <span class="extra-name">${extra.name}</span>
+      <span class="extra-price">+$${formatPrice(extra.price)}</span>
+    </label>
+  `).join("");
+
+  const size = flavor.sizes.find((s) => s.id === selectedSizeId);
+  const extrasTotal = [...selectedExtraIds].reduce((sum, id) => sum + EXTRAS.find((e) => e.id === id).price, 0);
+  addToCartBtn.textContent = `Agregar — $${formatPrice(size.price + extrasTotal)}`;
+}
+
+// 6) AGREGAR EL COMBO ELEGIDO AL CARRITO
+function addCurrentComboToCart() {
+  // sorted() para que "leche+gomitas" y "gomitas+leche" sean la misma clave
+  const extrasKey = [...selectedExtraIds].sort().join("+");
+  const comboKey = `${sheetFlavorId}__${selectedSizeId}__${extrasKey}`;
+
+  if (cart[comboKey]) {
+    cart[comboKey].qty += 1;
+  } else {
+    cart[comboKey] = {
+      flavorId: sheetFlavorId,
+      sizeId: selectedSizeId,
+      extraIds: [...selectedExtraIds],
+      qty: 1,
+    };
+  }
+  closeSizeSheet();
   renderCart();
 }
 
-function changeQty(id, delta) {
-  cart[id] = (cart[id] || 0) + delta;
-  if (cart[id] <= 0) delete cart[id];
+function changeQty(comboKey, delta) {
+  cart[comboKey].qty += delta;
+  if (cart[comboKey].qty <= 0) delete cart[comboKey];
   renderCart();
 }
 
-// 6) CALCULAR TOTALES
-// Object.entries(cart) convierte { cereza: 2 } en [["cereza", 2], ...]
+// 7) CALCULAR TOTALES
+// A partir de cada combo del carrito, reconstruimos sabor, tamaño y
+// extras para poder mostrar el detalle y calcular el precio real.
 function getCartItems() {
-  return Object.entries(cart).map(([id, qty]) => {
-    const product = MENU.find((m) => m.id === id);
-    return { ...product, qty, subtotal: product.price * qty };
+  return Object.entries(cart).map(([comboKey, entry]) => {
+    const flavor = findFlavor(entry.flavorId);
+    const size = flavor.sizes.find((s) => s.id === entry.sizeId);
+    const extras = entry.extraIds.map((id) => EXTRAS.find((e) => e.id === id));
+    const unitPrice = size.price + extras.reduce((sum, e) => sum + e.price, 0);
+
+    return {
+      comboKey,
+      flavor,
+      qty: entry.qty,
+      displayName: `${flavor.name} (${size.label})`,
+      extrasLabel: extras.map((e) => e.name).join(", "),
+      unitPrice,
+      subtotal: unitPrice * entry.qty,
+    };
   });
 }
 
@@ -95,18 +233,16 @@ function getCartCount(items) {
   return items.reduce((sum, item) => sum + item.qty, 0);
 }
 
-// 7) PINTAR EL CARRITO (lista, totales, barra inferior)
+// 8) PINTAR EL CARRITO
 function renderCart() {
   const items = getCartItems();
   const total = getCartTotal(items);
   const count = getCartCount(items);
 
-  // Barra inferior
   cartCountEl.textContent = count;
   cartTotalEl.textContent = formatPrice(total);
   cartToggle.classList.toggle("empty", count === 0);
 
-  // Lista dentro del panel
   cartTotalFullEl.textContent = formatPrice(total);
   confirmOrderBtn.disabled = count === 0;
 
@@ -117,20 +253,23 @@ function renderCart() {
   }
 
   cartItemsEl.innerHTML = items.map((item) => `
-    <li class="cart-row" style="--row-color: var(--${item.flavor})">
+    <li class="cart-row" style="--row-color: var(--${item.flavor.flavor})">
       <span class="swatch"></span>
-      <span class="row-name">${item.name}</span>
+      <div class="row-info">
+        <span class="row-name">${item.displayName}</span>
+        ${item.extrasLabel ? `<span class="row-extra">+ ${item.extrasLabel}</span>` : ""}
+      </div>
       <div class="qty-control">
-        <button data-action="dec" data-id="${item.id}" aria-label="Quitar uno">−</button>
+        <button data-action="dec" data-id="${item.comboKey}" aria-label="Quitar uno">−</button>
         <span>${item.qty}</span>
-        <button data-action="inc" data-id="${item.id}" aria-label="Agregar uno">+</button>
+        <button data-action="inc" data-id="${item.comboKey}" aria-label="Agregar uno">+</button>
       </div>
       <span class="row-price">$${formatPrice(item.subtotal)}</span>
     </li>
   `).join("");
 }
 
-// 8) ABRIR / CERRAR EL PANEL DEL CARRITO
+// 9) ABRIR / CERRAR EL PANEL DEL CARRITO
 function openCart() {
   cartDrawer.classList.add("open");
   overlay.classList.add("open");
@@ -143,14 +282,14 @@ function closeCart() {
   cartDrawer.setAttribute("aria-hidden", "true");
 }
 
-// 9) CONFIRMAR PEDIDO
-// Ahora sí lo mandamos a Firestore con guardarPedido(). Es async porque
-// hablar con la base de datos toma un instante; "await" espera esa respuesta
-// antes de seguir, sin congelar el resto de la página.
+// 10) CONFIRMAR PEDIDO
+// El nombre que guardamos ya incluye el tamaño y los extras en texto,
+// así la pantalla de pedidos (pedidos.js) no necesita ningún cambio:
+// para ella sigue siendo solo "nombre + cantidad + precio".
 async function confirmOrder() {
   const items = getCartItems();
   const total = getCartTotal(items);
-  const orderNumber = Math.floor(100 + Math.random() * 900); // ej: 482
+  const orderNumber = Math.floor(100 + Math.random() * 900);
 
   confirmOrderBtn.disabled = true;
   confirmOrderBtn.textContent = "Enviando...";
@@ -158,7 +297,13 @@ async function confirmOrder() {
   try {
     await guardarPedido({
       orderNumber,
-      items: items.map(({ id, name, qty, price, subtotal }) => ({ id, name, qty, price, subtotal })),
+      items: items.map((item) => ({
+        id: item.comboKey,
+        name: item.extrasLabel ? `${item.displayName} + ${item.extrasLabel}` : item.displayName,
+        qty: item.qty,
+        price: item.unitPrice,
+        subtotal: item.subtotal,
+      })),
       total,
     });
   } catch (err) {
@@ -182,14 +327,30 @@ function startNewOrder() {
   confirmationEl.hidden = true;
 }
 
-// 10) CONECTAR TODO CON EVENTOS
-// "Delegación de eventos": en vez de poner un listener por cada botón,
-// escuchamos en el contenedor padre y miramos qué se tocó. Es más eficiente
-// y sigue funcionando aunque el menú se vuelva a pintar.
+// 11) CONECTAR TODO CON EVENTOS
 menuEl.addEventListener("click", (e) => {
   const btn = e.target.closest(".add-btn");
-  if (btn) addToCart(btn.dataset.id);
+  if (btn) openSizeSheet(btn.dataset.id);
 });
+
+sizeOptionsEl.addEventListener("click", (e) => {
+  const chip = e.target.closest(".size-chip");
+  if (!chip) return;
+  selectedSizeId = chip.dataset.size;
+  renderSizeSheet();
+});
+
+extraOptionsEl.addEventListener("change", (e) => {
+  const input = e.target.closest("input[data-extra]");
+  if (!input) return;
+  if (input.checked) selectedExtraIds.add(input.dataset.extra);
+  else selectedExtraIds.delete(input.dataset.extra);
+  renderSizeSheet();
+});
+
+addToCartBtn.addEventListener("click", addCurrentComboToCart);
+closeSizeSheetBtn.addEventListener("click", closeSizeSheet);
+sizeOverlay.addEventListener("click", closeSizeSheet);
 
 cartItemsEl.addEventListener("click", (e) => {
   const btn = e.target.closest("button[data-action]");
@@ -212,6 +373,6 @@ overlay.addEventListener("click", closeCart);
 confirmOrderBtn.addEventListener("click", confirmOrder);
 newOrderBtn.addEventListener("click", startNewOrder);
 
-// 11) PRIMER PINTADO AL CARGAR LA PÁGINA
+// 12) PRIMER PINTADO AL CARGAR LA PÁGINA
 renderMenu();
 renderCart();

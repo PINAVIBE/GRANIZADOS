@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Granizados · Menú</title>
+<title>Granizados Hookah · Menú</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -13,8 +13,8 @@
   <!-- ====== HERO ====== -->
   <header class="hero">
     <p class="eyebrow">Escanea · Elige · Disfruta</p>
-    <h1> Granizados <span class="brand"></span></h1>
-    <p class="hero-sub">Pide desde tu celular. Te avisamos cuando esté listo.</p>
+    <h1>🍧 Granizados <span class="brand">Hookah</span></h1>
+    <p class="hero-sub">Pedí desde tu celular. Te avisamos cuando esté listo.</p>
 
     <!-- Los puntos de sabor filtran el menú Y muestran el color real de cada sabor -->
     <div class="flavor-filters" id="flavorFilters" role="group" aria-label="Filtrar por sabor">
@@ -60,6 +60,25 @@
         <strong>$<span id="cartTotalFull">0</span></strong>
       </div>
       <button class="btn-primary" id="confirmOrder" disabled>Confirmar pedido</button>
+    </div>
+  </aside>
+
+  <!-- ====== SELECCIÓN DE TAMAÑO Y EXTRAS (al tocar "+" en un sabor) ====== -->
+  <div class="overlay" id="sizeOverlay"></div>
+  <aside class="cart-drawer size-sheet" id="sizeSheet" aria-hidden="true">
+    <div class="cart-drawer-head">
+      <h2 id="sizeSheetTitle">Sabor</h2>
+      <button class="icon-btn" id="closeSizeSheet" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="size-sheet-body">
+      <p class="sheet-section-label">Tamaño</p>
+      <div class="size-options" id="sizeOptions"></div>
+
+      <p class="sheet-section-label">Extras</p>
+      <div class="extra-options" id="extraOptions"></div>
+    </div>
+    <div class="cart-drawer-foot">
+      <button class="btn-primary" id="addToCartBtn">Agregar — $0</button>
     </div>
   </aside>
 
