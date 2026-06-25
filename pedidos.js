@@ -6,7 +6,7 @@
    sola, sin recargar nada.
    ========================================================= */
 
-import { db } from "./firebase-init.js";
+import { db, iniciarSesion, cerrarSesion, alCambiarSesion } from "./firebase-init.js";
 import {
   collection,
   query,
@@ -22,6 +22,18 @@ const emptyPendientes = document.getElementById("emptyPendientes");
 const emptyListos = document.getElementById("emptyListos");
 const countPendientes = document.getElementById("countPendientes");
 const countListos = document.getElementById("countListos");
+
+const loginScreen = document.getElementById("loginScreen");
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
+const board = document.getElementById("board");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// Guarda la función para "dejar de escuchar" Firestore. La necesitamos
+// para cortar la conexión cuando alguien cierra sesión.
+let detenerEscucha = null;
 
 // Guardamos los pedidos más recientes vistos, así podemos "refrescar"
 // el texto de hace cuánto llegaron sin esperar un cambio nuevo en la base.
@@ -89,17 +101,17 @@ function render() {
   idsConocidos = new Set(ultimosPedidos.map((p) => p.id));
 }
 
-// Escuchamos la colección "pedidos" ordenada por fecha de creación.
-// onSnapshot no se "ejecuta una vez": queda escuchando para siempre,
-// y vuelve a llamar a esta función cada vez que algo cambia en la base.
-const pedidosQuery = query(collection(db, "pedidos"), orderBy("creadoEn", "asc"));
-
-onSnapshot(pedidosQuery, (snapshot) => {
-  ultimosPedidos = snapshot.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((p) => p.estado !== "entregado"); // los entregados ya no se muestran acá
-  render();
-});
+// Empieza a escuchar la colección "pedidos" en tiempo real.
+// Solo se llama cuando sabemos que hay sesión iniciada.
+function empezarAEscuchar() {
+  const pedidosQuery = query(collection(db, "pedidos"), orderBy("creadoEn", "asc"));
+  detenerEscucha = onSnapshot(pedidosQuery, (snapshot) => {
+    ultimosPedidos = snapshot.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((p) => p.estado !== "entregado"); // los entregados ya no se muestran acá
+    render();
+  });
+}
 
 // Refresca el "hace X min" cada 30s, aunque no llegue ningún pedido nuevo.
 setInterval(render, 30000);
@@ -118,3 +130,42 @@ function manejarClick(e) {
 
 cardsPendientes.addEventListener("click", manejarClick);
 cardsListos.addEventListener("click", manejarClick);
+
+// ---------- LOGIN ----------
+// alCambiarSesion se dispara apenas carga la página (para ver si ya
+// había una sesión activa) y de nuevo cada vez que alguien entra o sale.
+alCambiarSesion((user) => {
+  if (user) {
+    // Hay sesión: mostramos el tablero y prendemos la escucha de Firestore.
+    loginScreen.hidden = true;
+    board.hidden = false;
+    logoutBtn.hidden = false;
+    if (!detenerEscucha) empezarAEscuchar();
+  } else {
+    // No hay sesión: mostramos el login y apagamos la escucha
+    // (si la dejáramos prendida, Firestore rechazaría los datos
+    // por las reglas de seguridad y solo ensuciaría la consola).
+    loginScreen.hidden = false;
+    board.hidden = true;
+    logoutBtn.hidden = true;
+    if (detenerEscucha) {
+      detenerEscucha();
+      detenerEscucha = null;
+    }
+  }
+});
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginError.hidden = true;
+  try {
+    await iniciarSesion(loginEmail.value.trim(), loginPassword.value);
+    loginForm.reset();
+  } catch (err) {
+    console.error(err);
+    loginError.textContent = "Correo o contraseña incorrectos.";
+    loginError.hidden = false;
+  }
+});
+
+logoutBtn.addEventListener("click", () => cerrarSesion());
