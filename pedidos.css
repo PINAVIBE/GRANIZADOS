@@ -1,10 +1,4 @@
-/* =========================================================
-   pedidos.css — pantalla del puesto
-   Reusa las variables de color/tipografía definidas en styles.css
-   (--bg, --ink, --cereza, etc.) para que se vea como parte de la
-   misma app, pero con un layout pensado para una pantalla grande
-   fija en el mostrador, no para un celular.
-   ========================================================= */
+
 
 .ops-body {
   padding-bottom: 0;
@@ -35,6 +29,11 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+}
+
+.board[hidden],
+.login-screen[hidden] {
+  display: none;
 }
 
 .login-card {
