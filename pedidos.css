@@ -1,4 +1,10 @@
-
+/* =========================================================
+   pedidos.css — pantalla del puesto
+   Reusa las variables de color/tipografía definidas en styles.css
+   (--bg, --ink, --cereza, etc.) para que se vea como parte de la
+   misma app, pero con un layout pensado para una pantalla grande
+   fija en el mostrador, no para un celular.
+   ========================================================= */
 
 .ops-body {
   padding-bottom: 0;
@@ -29,6 +35,8 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
 .board[hidden],
@@ -36,20 +44,88 @@
   display: none;
 }
 
-.login-card {
+/* Manchas de luz ambiental detrás de la tarjeta, como neón reflejado */
+.login-glow {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-glow-1 {
+  background: var(--mango);
+  top: -80px;
+  left: -60px;
+}
+
+.login-glow-2 {
+  background: var(--tamarindo);
+  bottom: -100px;
+  right: -60px;
+}
+
+/* El "marco" con degradé de todos los sabores, simulando un borde de neón */
+.login-card-wrap {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
+  padding: 2px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--cereza), var(--mango), var(--limon), var(--mora), var(--tamarindo));
+  background-size: 200% 200%;
+  box-shadow: 0 0 50px -12px rgba(255, 157, 46, 0.45), 0 20px 40px -16px rgba(0,0,0,0.6);
+  animation: border-flow 6s ease infinite;
+}
+
+@keyframes border-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.login-card {
+  background: var(--bg-elev);
+  border-radius: 20px;
+  padding: 30px 26px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.login-card h2 {
-  font-family: 'Work Sans', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
+.login-icon {
+  font-size: 40px;
+  text-align: center;
+  margin: 0 0 2px;
+  filter: drop-shadow(0 0 16px rgba(255, 157, 46, 0.6));
+}
+
+.login-eyebrow {
   margin: 0;
   text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cereza);
+  text-shadow: 0 0 10px rgba(255, 45, 107, 0.6);
+}
+
+.login-card h2 {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 2px 0 0;
+  text-align: center;
+  color: var(--ink);
+}
+
+.login-card h2 .brand {
+  color: var(--mango);
+  text-shadow: 0 0 14px rgba(255, 157, 46, 0.55);
 }
 
 .login-sub {
@@ -60,18 +136,47 @@
 }
 
 .login-card input {
-  background: var(--bg-elev);
+  background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.12);
   color: var(--ink);
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 13px 14px;
   font-size: 14px;
   font-family: 'Work Sans', sans-serif;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-card input::placeholder {
+  color: var(--ink-soft);
 }
 
 .login-card input:focus {
   outline: none;
   border-color: var(--mango);
+  box-shadow: 0 0 0 3px rgba(255, 157, 46, 0.18);
+}
+
+.login-submit {
+  border: none;
+  border-radius: 999px;
+  padding: 13px;
+  margin-top: 4px;
+  background: linear-gradient(90deg, var(--cereza), var(--mango));
+  color: #0A0D14;
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 0 22px -4px var(--mango);
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.login-submit:hover {
+  box-shadow: 0 0 30px -2px var(--mango);
+}
+
+.login-submit:active {
+  transform: scale(0.98);
 }
 
 .login-error {
@@ -79,6 +184,10 @@
   font-size: 13px;
   text-align: center;
   margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card-wrap { animation: none; }
 }
 
 .ops-header h1 {

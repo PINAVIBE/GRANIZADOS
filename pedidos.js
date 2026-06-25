@@ -1,10 +1,3 @@
-/* =========================================================
-   pedidos.js — pantalla del puesto
-   A diferencia de script.js (que escribe pedidos), este archivo
-   solo LEE pedidos en tiempo real con onSnapshot: cada vez que
-   alguien confirma un pedido en el menú, esta pantalla se entera
-   sola, sin recargar nada.
-   ========================================================= */
 
 import { db, iniciarSesion, cerrarSesion, alCambiarSesion } from "./firebase-init.js";
 import {

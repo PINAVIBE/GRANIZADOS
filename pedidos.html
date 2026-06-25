@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pedidos en vivo · Granizados</title>
+<title>Pedidos en vivo · Granizados El Frescor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -12,21 +12,28 @@
 <body class="ops-body">
 
   <header class="ops-header">
-    <h1>Pedidos en vivo</h1>
-    <p class="ops-sub"></p>
+    <h1>🍧 Pedidos en vivo</h1>
+    <p class="ops-sub">Se actualiza solo. No hace falta recargar la página.</p>
     <button class="logout-btn" id="logoutBtn" hidden>Salir</button>
   </header>
 
   <!-- ====== LOGIN (se muestra si no hay sesión iniciada) ====== -->
   <section class="login-screen" id="loginScreen">
-    <form class="login-card" id="loginForm">
-      <h2>Acceso del puesto</h2>
-      <p class="login-sub">Ingresá con tu correo y contraseña de Firebase.</p>
-      <input type="email" id="loginEmail" placeholder="Correo" required autocomplete="username">
-      <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password">
-      <button type="submit" class="order-action to-listo">Entrar</button>
-      <p class="login-error" id="loginError" hidden></p>
-    </form>
+    <div class="login-glow login-glow-1" aria-hidden="true"></div>
+    <div class="login-glow login-glow-2" aria-hidden="true"></div>
+
+    <div class="login-card-wrap">
+      <form class="login-card" id="loginForm">
+        <p class="login-icon">🍧</p>
+        <p class="login-eyebrow">Panel del puesto</p>
+        <h2>Granizados <span class="brand">El Frescor</span></h2>
+        <p class="login-sub">Ingresá con tu correo y contraseña para ver los pedidos.</p>
+        <input type="email" id="loginEmail" placeholder="Correo" required autocomplete="username">
+        <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password">
+        <button type="submit" class="login-submit">Entrar</button>
+        <p class="login-error" id="loginError" hidden></p>
+      </form>
+    </div>
   </section>
 
   <main class="board" id="board" hidden>
