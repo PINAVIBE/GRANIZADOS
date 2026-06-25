@@ -1,0 +1,197 @@
+
+
+.reportes-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 28px 50px;
+}
+
+/* Defensivo: por si algún día display de .reportes-main cambia,
+   esto asegura que [hidden] siga ganando (la lección de siempre). */
+.reportes-main[hidden] {
+  display: none;
+}
+
+.nav-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--mango);
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- BOTONES DE RANGO ---------- */
+.range-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.range-btn {
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.03);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Work Sans', sans-serif;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.range-btn.active {
+  border-color: var(--mango);
+  background: rgba(255, 157, 46, 0.12);
+  color: var(--mango);
+}
+
+/* ---------- TARJETAS DE ESTADÍSTICAS ---------- */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 640px) {
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+.stat-card {
+  background: var(--bg-elev);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ---------- RANKING DE SABORES ---------- */
+.top-flavors, .orders-table-wrap {
+  margin-bottom: 34px;
+}
+
+.top-flavors h2, .orders-table-wrap h2 {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+.flavor-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.flavor-bar-name {
+  width: 110px;
+  flex-shrink: 0;
+  color: var(--ink);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flavor-bar-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.flavor-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cereza), var(--mango));
+  border-radius: 999px;
+}
+
+.flavor-bar-count {
+  width: 100px;
+  text-align: right;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.empty-msg-reportes {
+  color: var(--ink-soft);
+  font-size: 14px;
+  padding: 16px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+}
+
+/* ---------- TABLA DE PEDIDOS ---------- */
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.orders-table th {
+  text-align: left;
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.orders-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: var(--ink);
+  vertical-align: top;
+}
+
+.orders-table .od-items {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+/* En celular, la tabla se reacomoda en tarjetas en vez de filas anchas */
+@media (max-width: 640px) {
+  .orders-table thead { display: none; }
+  .orders-table, .orders-table tbody, .orders-table tr, .orders-table td {
+    display: block;
+    width: 100%;
+  }
+  .orders-table tr {
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 6px;
+  }
+  .orders-table td {
+    border-bottom: none;
+    padding: 3px 0;
+  }
+}

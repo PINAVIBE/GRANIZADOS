@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes · Granizados Hookah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pedidos.css">
+<link rel="stylesheet" href="reportes.css">
+</head>
+<body class="ops-body">
+
+  <header class="ops-header">
+    <h1>📊 Reportes</h1>
+    <p class="ops-sub">Cuánto vendiste y qué sabores se mueven más.</p>
+    <a class="nav-link" href="pedidos.html">🛎️ Ver pedidos en vivo</a>
+    <button class="logout-btn" id="logoutBtn" hidden>Salir</button>
+  </header>
+
+  <!-- ====== LOGIN (idéntico al de pedidos.html, misma sesión sirve para las dos) ====== -->
+  <section class="login-screen" id="loginScreen">
+    <div class="login-glow login-glow-1" aria-hidden="true"></div>
+    <div class="login-glow login-glow-2" aria-hidden="true"></div>
+
+    <div class="login-card-wrap">
+      <form class="login-card" id="loginForm">
+        <p class="login-icon">🍧</p>
+        <p class="login-eyebrow">Panel del puesto</p>
+        <h2>Granizados <span class="brand">Hookah</span></h2>
+        <p class="login-sub">Ingresá con tu correo y contraseña para ver los reportes.</p>
+        <input type="email" id="loginEmail" placeholder="Correo" required autocomplete="username">
+        <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password">
+        <button type="submit" class="login-submit">Entrar</button>
+        <p class="login-error" id="loginError" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <main class="reportes-main" id="reportesMain" hidden>
+
+    <div class="range-buttons" id="rangeButtons">
+      <button class="range-btn active" data-range="hoy">Hoy</button>
+      <button class="range-btn" data-range="semana">Esta semana</button>
+      <button class="range-btn" data-range="mes">Este mes</button>
+      <button class="range-btn" data-range="todo">Todo</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-label">Recaudado</span>
+        <span class="stat-value" id="statTotal">$0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Pedidos entregados</span>
+        <span class="stat-value" id="statCount">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Ticket promedio</span>
+        <span class="stat-value" id="statAvg">$0</span>
+      </div>
+    </div>
+
+    <section class="top-flavors">
+      <h2>Sabores más vendidos</h2>
+      <div id="topFlavorsList"><p class="empty-msg-reportes">Cargando...</p></div>
+    </section>
+
+    <section class="orders-table-wrap">
+      <h2>Detalle de pedidos entregados</h2>
+      <div id="ordersTable"></div>
+    </section>
+
+  </main>
+
+  <script type="module" src="reportes.js"></script>
+</body>
+</html>
