@@ -1,4 +1,5 @@
 
+
 import { guardarPedido } from "./firebase-init.js";
 
 // 1) LOS DATOS DEL MENÚ
@@ -81,6 +82,7 @@ const cartCountEl = document.getElementById("cartCount");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalFullEl = document.getElementById("cartTotalFull");
 const confirmOrderBtn = document.getElementById("confirmOrder");
+const orderNoteEl = document.getElementById("orderNote");
 const confirmationEl = document.getElementById("orderConfirmation");
 const orderNumberEl = document.getElementById("orderNumber");
 const newOrderBtn = document.getElementById("newOrder");
@@ -290,6 +292,7 @@ async function confirmOrder() {
   const items = getCartItems();
   const total = getCartTotal(items);
   const orderNumber = Math.floor(100 + Math.random() * 900);
+  const nota = orderNoteEl.value.trim(); // queda en "" si no escribió nada
 
   confirmOrderBtn.disabled = true;
   confirmOrderBtn.textContent = "Enviando...";
@@ -305,6 +308,7 @@ async function confirmOrder() {
         subtotal: item.subtotal,
       })),
       total,
+      nota,
     });
   } catch (err) {
     console.error("No se pudo guardar el pedido:", err);
@@ -319,6 +323,7 @@ async function confirmOrder() {
   closeCart();
 
   cart = {};
+  orderNoteEl.value = "";
   renderCart();
   confirmOrderBtn.textContent = "Confirmar pedido";
 }

@@ -327,6 +327,16 @@
   margin-right: 6px;
 }
 
+.order-note {
+  background: rgba(255, 157, 46, 0.12);
+  border: 1px solid rgba(255, 157, 46, 0.3);
+  color: var(--mango);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+
 .order-total {
   font-size: 13px;
   color: var(--ink-soft);

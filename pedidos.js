@@ -43,6 +43,16 @@ function formatPrice(n) {
   return n.toLocaleString("es-CO");
 }
 
+// El texto de la nota lo escribe el cliente, así que antes de meterlo en el
+// HTML hay que "escaparlo": cambiar <, >, & etc. por su versión segura.
+// Si no hiciéramos esto, alguien podría escribir código en la nota y que
+// se ejecute en tu pantalla de pedidos.
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[ch]));
+}
+
 // Convierte un timestamp de Firestore en "hace 2 min"
 function haceCuanto(timestamp) {
   if (!timestamp) return "justo ahora";
@@ -65,6 +75,10 @@ function crearTarjeta(pedido) {
     .map((it) => `<li><span><span class="item-qty">${it.qty}×</span>${it.name}</span><span>$${formatPrice(it.subtotal)}</span></li>`)
     .join("");
 
+  const notaHtml = pedido.nota
+    ? `<p class="order-note">📝 ${escapeHtml(pedido.nota)}</p>`
+    : "";
+
   let accion = "";
   if (pedido.estado === "pendiente") {
     accion = `<button class="order-action to-listo" data-id="${pedido.id}" data-next="listo">✅ Marcar como listo</button>`;
@@ -79,6 +93,7 @@ function crearTarjeta(pedido) {
       <span class="order-time">${haceCuanto(pedido.creadoEn)}</span>
     </div>
     <ul class="order-items">${itemsHtml}</ul>
+    ${notaHtml}
     <p class="order-total">Total: <strong>$${formatPrice(pedido.total)}</strong></p>
     ${accion}
   `;
