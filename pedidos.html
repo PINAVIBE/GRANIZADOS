@@ -12,9 +12,10 @@
 <body class="ops-body">
 
   <header class="ops-header">
-    <h1>PEDIDOS EN VIVO</h1>
-    <p class="ops-sub"></p>
+    <h1>🍧 Pedidos en vivo</h1>
+    <p class="ops-sub">Se actualiza solo. No hace falta recargar la página.</p>
     <a class="nav-link" href="reportes.html">📊 Ver reportes</a>
+    <button class="sound-toggle" id="soundToggle" title="Sonido de alerta" hidden>🔔</button>
     <button class="logout-btn" id="logoutBtn" hidden>Salir</button>
   </header>
 
@@ -25,8 +26,8 @@
 
     <div class="login-card-wrap">
       <form class="login-card" id="loginForm">
-        <p class="login-icon"></p>
-        <p class="login-eyebrow">BIENVENIDO</p>
+        <p class="login-icon">🍧</p>
+        <p class="login-eyebrow">Panel del puesto</p>
         <h2>Granizados <span class="brand">Hookah</span></h2>
         <p class="login-sub">Ingresá con tu correo y contraseña para ver los pedidos.</p>
         <input type="email" id="loginEmail" placeholder="Correo" required autocomplete="username">
@@ -43,7 +44,7 @@
         Pendientes <span class="count" id="countPendientes">0</span>
       </h2>
       <div class="cards" id="cardsPendientes">
-        <p class="empty-msg" id="emptyPendientes">No hay pedidos pendientes </p>
+        <p class="empty-msg" id="emptyPendientes">No hay pedidos pendientes 🎉</p>
       </div>
     </section>
 

@@ -1,4 +1,10 @@
-
+/* =========================================================
+   pedidos.js — pantalla del puesto
+   A diferencia de script.js (que escribe pedidos), este archivo
+   solo LEE pedidos en tiempo real con onSnapshot: cada vez que
+   alguien confirma un pedido en el menú, esta pantalla se entera
+   sola, sin recargar nada.
+   ========================================================= */
 
 import { db, iniciarSesion, cerrarSesion, alCambiarSesion } from "./firebase-init.js";
 import {
@@ -29,10 +35,53 @@ const loginPassword = document.getElementById("loginPassword");
 const loginError = document.getElementById("loginError");
 const board = document.getElementById("board");
 const logoutBtn = document.getElementById("logoutBtn");
+const soundToggleBtn = document.getElementById("soundToggle");
 
 // Guarda la función para "dejar de escuchar" Firestore. La necesitamos
 // para cortar la conexión cuando alguien cierra sesión.
 let detenerEscucha = null;
+
+// Estado de la alarma sonora. audioCtx se crea recién al iniciar sesión
+// (un clic real), porque los navegadores no dejan reproducir sonido
+// "solo" sin que la persona haya interactuado antes con la página.
+let audioCtx = null;
+let sonidoActivado = true;
+// En el primer "snapshot" después de iniciar sesión no queremos sonar
+// para cada pedido que ya estaba ahí de antes — solo para los nuevos
+// que lleguen DESPUÉS de que la pantalla ya está abierta.
+let primerSnapshot = true;
+
+function desbloquearAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+
+// Un "ding-ding" corto hecho con dos tonos, sin necesitar ningún
+// archivo de audio: el navegador lo genera al vuelo.
+function reproducirSonidoAlerta() {
+  if (!sonidoActivado || !audioCtx) return;
+  try {
+    const ahora = audioCtx.currentTime;
+    [880, 1320].forEach((frecuencia, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = frecuencia;
+      const inicio = ahora + i * 0.15;
+      gain.gain.setValueAtTime(0, inicio);
+      gain.gain.linearRampToValueAtTime(0.25, inicio + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, inicio + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(inicio);
+      osc.stop(inicio + 0.3);
+    });
+  } catch (err) {
+    console.error("No se pudo reproducir el sonido de alerta:", err);
+  }
+}
 
 // Guardamos los pedidos más recientes vistos, así podemos "refrescar"
 // el texto de hace cuánto llegaron sin esperar un cambio nuevo en la base.
@@ -152,6 +201,7 @@ function empezarAEscuchar() {
   // Medianoche de hoy, hora local del navegador.
   const inicioDelDia = new Date();
   inicioDelDia.setHours(0, 0, 0, 0);
+  primerSnapshot = true;
 
   const pedidosQuery = query(
     collection(db, "pedidos"),
@@ -160,7 +210,17 @@ function empezarAEscuchar() {
   );
 
   detenerEscucha = onSnapshot(pedidosQuery, (snapshot) => {
-    ultimosPedidos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    // ¿Llegó algún pedido pendiente que no conocíamos? (y no es la
+    // primera carga, donde TODO es "nuevo" para la pantalla recién abierta)
+    if (!primerSnapshot) {
+      const hayPedidoNuevo = docs.some((p) => p.estado === "pendiente" && !idsConocidos.has(p.id));
+      if (hayPedidoNuevo) reproducirSonidoAlerta();
+    }
+    primerSnapshot = false;
+
+    ultimosPedidos = docs;
     render();
   });
 }
@@ -201,6 +261,7 @@ alCambiarSesion((user) => {
     loginScreen.hidden = true;
     board.hidden = false;
     logoutBtn.hidden = false;
+    soundToggleBtn.hidden = false;
     if (!detenerEscucha) empezarAEscuchar();
   } else {
     // No hay sesión: mostramos el login y apagamos la escucha
@@ -209,6 +270,7 @@ alCambiarSesion((user) => {
     loginScreen.hidden = false;
     board.hidden = true;
     logoutBtn.hidden = true;
+    soundToggleBtn.hidden = true;
     if (detenerEscucha) {
       detenerEscucha();
       detenerEscucha = null;
@@ -219,6 +281,7 @@ alCambiarSesion((user) => {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.hidden = true;
+  desbloquearAudio(); // esto sí es un clic real, así que el navegador nos deja
   try {
     await iniciarSesion(loginEmail.value.trim(), loginPassword.value);
     loginForm.reset();
@@ -230,3 +293,10 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 logoutBtn.addEventListener("click", () => cerrarSesion());
+
+soundToggleBtn.addEventListener("click", () => {
+  sonidoActivado = !sonidoActivado;
+  soundToggleBtn.textContent = sonidoActivado ? "🔔" : "🔕";
+  soundToggleBtn.classList.toggle("muted", !sonidoActivado);
+  soundToggleBtn.title = sonidoActivado ? "Sonido de alerta (activado)" : "Sonido de alerta (silenciado)";
+});
