@@ -56,12 +56,23 @@ const EXTRAS = [
   { id: "chamoy", name: "Chamoy", price: 600 },
 ];
 
+// Tus llaves Bre-B (el sistema de transferencias inmediatas de Colombia).
+// Reemplazá estos valores por tus llaves reales, las que registraste
+// desde la app de Nequi / Bancolombia.
+const LLAVES_PAGO = {
+  nequi: "@NEQUITUCLAVE",       // ej: @NEQUIJUA678
+  bancolombia: "0000000000",    // tu llave Bancolombia Negocios (10 dígitos, empieza en 00)
+};
+
 // 2) EL ESTADO DEL CARRITO
 // Antes era { idSabor: cantidad }. Ahora cada "combo" (sabor + tamaño +
 // extras elegidos) es su propia línea, porque dos pedidos de Cereza con
 // tamaños distintos no pueden compartir cantidad ni precio.
 // cart = { comboKey: { flavorId, sizeId, extraIds: [...], qty } }
 let cart = {};
+
+// Qué método de pago eligió el cliente: "efectivo", "nequi" o "bancolombia".
+let metodoPagoSeleccionado = "efectivo";
 
 // Estado temporal mientras el cliente está eligiendo tamaño/extras
 // para un sabor (antes de tocar "Agregar").
@@ -83,6 +94,8 @@ const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalFullEl = document.getElementById("cartTotalFull");
 const confirmOrderBtn = document.getElementById("confirmOrder");
 const orderNoteEl = document.getElementById("orderNote");
+const paymentOptionsEl = document.getElementById("paymentOptions");
+const paymentLlaveBoxEl = document.getElementById("paymentLlaveBox");
 const confirmationEl = document.getElementById("orderConfirmation");
 const orderNumberEl = document.getElementById("orderNumber");
 const newOrderBtn = document.getElementById("newOrder");
@@ -235,7 +248,34 @@ function getCartCount(items) {
   return items.reduce((sum, item) => sum + item.qty, 0);
 }
 
-// 8) PINTAR EL CARRITO
+// 8.5) MÉTODO DE PAGO
+// Pinta los 3 botones (Efectivo/Nequi/Bancolombia) y, si el elegido es
+// una transferencia, muestra la llave Bre-B correspondiente con el
+// total actualizado para que el cliente la copie.
+function renderPaymentOptions() {
+  const items = getCartItems();
+  const total = getCartTotal(items);
+
+  paymentOptionsEl.innerHTML = `
+    <button type="button" class="pay-chip ${metodoPagoSeleccionado === "efectivo" ? "selected" : ""}" data-method="efectivo">💵 Efectivo</button>
+    <button type="button" class="pay-chip ${metodoPagoSeleccionado === "nequi" ? "selected" : ""}" data-method="nequi">📱 Nequi</button>
+    <button type="button" class="pay-chip ${metodoPagoSeleccionado === "bancolombia" ? "selected" : ""}" data-method="bancolombia">🏦 Bancolombia</button>
+  `;
+
+  if (metodoPagoSeleccionado === "efectivo") {
+    paymentLlaveBoxEl.hidden = true;
+    return;
+  }
+
+  const llave = LLAVES_PAGO[metodoPagoSeleccionado];
+  const nombreMetodo = metodoPagoSeleccionado === "nequi" ? "Nequi" : "Bancolombia";
+  paymentLlaveBoxEl.hidden = false;
+  paymentLlaveBoxEl.innerHTML = `
+    Envía <strong>$${formatPrice(total)}</strong> por Bre-B a esta llave de ${nombreMetodo}:
+    <span class="llave-value">${llave}</span>
+    Buscá "Bre-B" en tu app y confirmá el pedido después de transferir.
+  `;
+}
 function renderCart() {
   const items = getCartItems();
   const total = getCartTotal(items);
@@ -247,6 +287,7 @@ function renderCart() {
 
   cartTotalFullEl.textContent = formatPrice(total);
   confirmOrderBtn.disabled = count === 0;
+  renderPaymentOptions();
 
   if (items.length === 0) {
     cartItemsEl.innerHTML = "";
@@ -309,6 +350,11 @@ async function confirmOrder() {
       })),
       total,
       nota,
+      metodoPago: metodoPagoSeleccionado,
+      // Si pagó en efectivo, se paga al recoger: no hay nada que "verificar".
+      // Si fue Nequi/Bancolombia, queda pendiente hasta que el puesto
+      // chequee en su propia app que la plata llegó.
+      pagoConfirmado: metodoPagoSeleccionado === "efectivo",
     });
   } catch (err) {
     console.error("No se pudo guardar el pedido:", err);
@@ -324,6 +370,7 @@ async function confirmOrder() {
 
   cart = {};
   orderNoteEl.value = "";
+  metodoPagoSeleccionado = "efectivo";
   renderCart();
   confirmOrderBtn.textContent = "Confirmar pedido";
 }
@@ -362,6 +409,13 @@ cartItemsEl.addEventListener("click", (e) => {
   if (!btn) return;
   const delta = btn.dataset.action === "inc" ? 1 : -1;
   changeQty(btn.dataset.id, delta);
+});
+
+paymentOptionsEl.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pay-chip");
+  if (!btn) return;
+  metodoPagoSeleccionado = btn.dataset.method;
+  renderPaymentOptions();
 });
 
 filtersEl.addEventListener("click", (e) => {

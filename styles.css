@@ -471,6 +471,57 @@ h1, h2 {
   margin-bottom: 6px;
 }
 
+.payment-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pay-chip {
+  flex: 1;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.03);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 9px 4px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pay-chip.selected {
+  border-color: var(--mango);
+  background: rgba(255, 157, 46, 0.12);
+  color: var(--mango);
+}
+
+.payment-llave-box {
+  background: rgba(255, 157, 46, 0.08);
+  border: 1px solid rgba(255, 157, 46, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.payment-llave-box strong {
+  color: var(--ink);
+}
+
+.llave-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mango);
+  margin: 4px 0;
+  letter-spacing: 0.02em;
+}
+
 .note-input {
   width: 100%;
   background: rgba(255,255,255,0.04);

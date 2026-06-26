@@ -79,6 +79,20 @@ function crearTarjeta(pedido) {
     ? `<p class="order-note">📝 ${escapeHtml(pedido.nota)}</p>`
     : "";
 
+  const metodoLabels = { efectivo: "💵 Efectivo", nequi: "📱 Nequi", bancolombia: "🏦 Bancolombia" };
+  const metodoTexto = metodoLabels[pedido.metodoPago] || "💵 Efectivo";
+
+  let pagoHtml = "";
+  if (pedido.metodoPago && pedido.metodoPago !== "efectivo") {
+    pagoHtml = pedido.pagoConfirmado
+      ? `<p class="payment-tag confirmado">${metodoTexto} · pago confirmado ✅</p>`
+      : `<p class="payment-tag pendiente">${metodoTexto} · pago por verificar
+          <button class="confirm-pago-btn" data-id="${pedido.id}">Confirmar pago</button>
+        </p>`;
+  } else {
+    pagoHtml = `<p class="payment-tag">${metodoTexto}</p>`;
+  }
+
   let accion = "";
   if (pedido.estado === "pendiente") {
     accion = `<button class="order-action to-listo" data-id="${pedido.id}" data-next="listo">✅ Marcar como listo</button>`;
@@ -93,6 +107,7 @@ function crearTarjeta(pedido) {
       <span class="order-time">${haceCuanto(pedido.creadoEn)}</span>
     </div>
     <ul class="order-items">${itemsHtml}</ul>
+    ${pagoHtml}
     ${notaHtml}
     <p class="order-total">Total: <strong>$${formatPrice(pedido.total)}</strong></p>
     ${accion}
@@ -156,6 +171,15 @@ setInterval(render, 30000);
 // Un solo listener por columna (delegación de eventos) para los botones
 // de "marcar como listo" / "marcar como entregado".
 function manejarClick(e) {
+  const pagoBtn = e.target.closest(".confirm-pago-btn");
+  if (pagoBtn) {
+    updateDoc(doc(db, "pedidos", pagoBtn.dataset.id), { pagoConfirmado: true }).catch((err) => {
+      console.error("No se pudo confirmar el pago:", err);
+      alert("No se pudo confirmar el pago. Probá de nuevo.");
+    });
+    return;
+  }
+
   const btn = e.target.closest(".order-action");
   if (!btn) return;
   const { id, next } = btn.dataset;
